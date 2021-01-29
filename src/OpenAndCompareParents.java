@@ -10,11 +10,12 @@ class OpenAndComparesParents {
 
     /**
      * Constructor for OpenAndComparesParents
-     * Creates several hashmaps to save the information from the parents in.
+     * Creates a hashmap to save the information from the parents in.
+     * Creates an arraylist of all the parents.
      * next it creates an arraylist which will hold temporary values.
      * next it creates a list which contains 6 filenames.
-     * It loops over the different filenames and opens them, splits them on the tabs and adds a hashmap.
-     * next it creates an arraylist to add all the hashmaps into of the parents.
+     * It loops over the different filenames and opens them, splits them on the tabs and adds them to a hashmap.
+     * next it adds the parents to the arraylist
      * it also creates an arraylist for the child
      * next it loops over the parents, so every parent can be matched with every parent.
      * it then adds the overlapping keys from the hashmaps to an arraylist.
@@ -24,90 +25,47 @@ class OpenAndComparesParents {
      */
     public OpenAndComparesParents(HashMap<Integer, Variant2> variant_hashmap) throws IOException, NotValidFile {
 
-        HashMap<String, ArrayList<String>> parent1 = new HashMap<>();
-        HashMap<String, ArrayList<String>> parent2 = new HashMap<>();
-        HashMap<String, ArrayList<String>> parent3 = new HashMap<>();
-        HashMap<String, ArrayList<String>> parent4 = new HashMap<>();
-        HashMap<String, ArrayList<String>> parent5 = new HashMap<>();
-        HashMap<String, ArrayList<String>> parent6 = new HashMap<>();
-
         ArrayList <String> temp_values = new ArrayList<>();
 
-        List<String> list_of_files = Arrays.asList("5443.23andme.3943", "8608.23andme.6967", "8998.23andme.7341",
+        ArrayList<HashMap<String, ArrayList<String>>> list_of_parents = new ArrayList<>();
+
+        List<String> list_of_files = Arrays.asList("5443.23andme.3943", "8608.23andme.6967",
                 "9489.23andme.7786", "9590.23andme.8112", "9684.23andme.7952");
 
         for (String file : list_of_files) {
             File filename = new File(file);
             BufferedReader buffered_reader = new BufferedReader(new FileReader(filename));
             String line = buffered_reader.readLine();
-            if(line!=null){
-                if(line.contains("23andMe")){
+            if (line != null) {
+                if (line.contains("23andMe")) {
+                    HashMap<String, ArrayList<String>> parent = new HashMap<>();
                     while ((line = buffered_reader.readLine()) != null) {
                         if (line.startsWith("rs")) {
                             String[] splitting_spaces = line.split("\t");
-                            if (filename.toString().equals("5443.23andme.3943")) {
-                                temp_values.add(splitting_spaces[1]);
-                                temp_values.add(splitting_spaces[2]);
-                                temp_values.add(splitting_spaces[3]);
-                                parent1.put(splitting_spaces[0], temp_values);
-                            }
-                            if (filename.toString().equals("8608.23andme.6967")) {
-                                temp_values.add(splitting_spaces[1]);
-                                temp_values.add(splitting_spaces[2]);
-                                temp_values.add(splitting_spaces[3]);
-                                parent2.put(splitting_spaces[0], temp_values);
-                            }
-                            if (filename.toString().equals("8998.23andme.7341")) {
-                                temp_values.add(splitting_spaces[1]);
-                                temp_values.add(splitting_spaces[2]);
-                                temp_values.add(splitting_spaces[3]);
-                                parent3.put(splitting_spaces[0], temp_values);
-                            }
-                            if (filename.toString().equals("9489.23andme.7786")) {
-                                temp_values.add(splitting_spaces[1]);
-                                temp_values.add(splitting_spaces[2]);
-                                temp_values.add(splitting_spaces[3]);
-                                parent4.put(splitting_spaces[0], temp_values);
-                            }
-                            if (filename.toString().equals("9590.23andme.8112")) {
-                                temp_values.add(splitting_spaces[1]);
-                                temp_values.add(splitting_spaces[2]);
-                                temp_values.add(splitting_spaces[3]);
-                                parent5.put(splitting_spaces[0], temp_values);
-                            }
-                            if (filename.toString().equals("9684.23andme.7952")) {
-                                temp_values.add(splitting_spaces[1]);
-                                temp_values.add(splitting_spaces[2]);
-                                temp_values.add(splitting_spaces[3]);
-                                parent6.put(splitting_spaces[0], temp_values);
-                            }
+                            temp_values.add(splitting_spaces[1]);
+                            temp_values.add(splitting_spaces[2]);
+                            temp_values.add(splitting_spaces[3]);
+                            parent.put(splitting_spaces[0], temp_values);
                         }
                     }
-                }else{
+                    list_of_parents.add(parent);
+                    }  else{
                     throw new NotValidFile();
                 }
             }
         }
 
-        ArrayList<HashMap<String, ArrayList<String>>> list_of_parents = new ArrayList<>();
-        list_of_parents.add(parent1);
-        list_of_parents.add(parent2);
-        list_of_parents.add(parent3);
-        list_of_parents.add(parent4);
-        list_of_parents.add(parent5);
-        list_of_parents.add(parent6);
-
         ArrayList<ArrayList<String>> kid = new ArrayList<>();
 
 
-        for (int i = 0; i < 5; i++){
-            for (int j = i + 1; j < 5; j++) {
+        for (int i = 0; i < list_of_parents.size(); i++){
+            for (int j = i + 1; j < list_of_parents.size(); j++) {
                 ArrayList<String> overlappingKeys = CompareKeys(list_of_parents.get(i), list_of_parents.get(j));
                 for(String key: overlappingKeys){
                     try{
                         int rs_key  = Integer.parseInt(key.substring(2));
                         Variant2 variant = variant_hashmap.get(rs_key);
-                        String alternate_allele = variant.getAlternate_allele(); // dit gaat mis, dit blijft null
+                        String alternate_allele = variant.getAlternate_allele();
                         if(list_of_parents.get(i).get(key).get(2).contains(alternate_allele) &&
                                 list_of_parents.get(j).get(key).get(2).contains(alternate_allele) && variant.getPathogenicity()==1){
                             kid.add(new ArrayList<>(Arrays.asList(key, alternate_allele + alternate_allele, variant.getChromosome(),

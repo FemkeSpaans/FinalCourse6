@@ -2,7 +2,7 @@ import java.io.IOException;
 
 public class Main {
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws IOException, NotValidFile {
         try{
             new Commandline1();
             new OpenAndComparesParents(ReadSummary.read_file());
@@ -11,7 +11,6 @@ public class Main {
         } catch (IOException exception) {
             System.out.println("Something went wrong, try again.");
         }
-
     }
 }
 
